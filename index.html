@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Segnala — Comune di Biella</title>
+<meta name="description" content="Segnala problemi al Comune in pochi secondi dal tuo smartphone."/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blu:#1A56A0;--blu-d:#0C447C;--blu-l:#e6f0fb;
+  --rosso:#A32D2D;--rosso-l:#fcebeb;
+  --verde:#3B6D11;--verde-l:#eaf3de;
+  --arancio:#854F0B;--arancio-l:#faeeda;
+  --text:#1a1a1a;--muted:#666;--hint:#999;
+  --border:#e0e0e0;--bg:#f7f7f5;--white:#fff;
+  --radius:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+.top{background:var(--blu);padding:14px 18px 10px;}
+.top-row{display:flex;align-items:center;justify-content:space-between;}
+.top-logo{color:#fff;font-size:16px;font-weight:600;display:flex;align-items:center;gap:7px;}
+.top-sub{color:rgba(255,255,255,0.8);font-size:12px;margin-top:3px;}
+.geo-badge{background:rgba(255,255,255,0.2);color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px;}
+.container{max-width:480px;width:100%;margin:0 auto;padding:20px 16px 48px;flex:1;}
+.step-bar{display:flex;align-items:center;gap:6px;margin-bottom:22px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .2s;}
+.dot.done{background:var(--blu);}
+.dot.active{background:var(--blu);width:22px;border-radius:4px;}
+.step-lbl{font-size:12px;color:var(--muted);margin-left:auto;}
+.step{display:none;}
+.step.on{display:block;}
+.stitle{font-size:20px;font-weight:600;color:var(--text);margin-bottom:18px;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500;}
+.fg input,.fg textarea{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:16px;color:var(--text);background:var(--white);}
+.fg input:focus,.fg textarea:focus{outline:none;border-color:var(--blu);}
+.fg textarea{min-height:90px;resize:none;}
+.optional{font-size:11px;color:var(--hint);margin-left:4px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px;}
+.sel-card{border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 8px;text-align:center;cursor:pointer;background:var(--white);transition:all .15s;}
+.sel-card .ico{font-size:26px;display:block;margin-bottom:6px;}
+.sel-card strong{display:block;font-size:13px;color:var(--text);}
+.sel-card small{display:block;font-size:11px;color:var(--hint);margin-top:2px;}
+.sel-card.sel{border-color:var(--blu);background:var(--blu-l);}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.cat-card{border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 8px;text-align:center;cursor:pointer;background:var(--white);}
+.cat-card .ico{font-size:26px;display:block;margin-bottom:5px;}
+.cat-card strong{display:block;font-size:13px;color:var(--text);}
+.cat-card small{display:block;font-size:11px;color:var(--hint);margin-top:2px;}
+.cat-card.sel{border-color:var(--blu);background:var(--blu-l);}
+.urg-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;}
+.urg-card{border:1.5px solid var(--border);border-radius:8px;padding:11px 5px;text-align:center;cursor:pointer;background:var(--white);}
+.urg-card .ico{font-size:22px;display:block;margin-bottom:3px;}
+.urg-card strong{display:block;font-size:12px;color:var(--text);}
+.urg-card small{display:block;font-size:10px;color:var(--hint);}
+.urg-card.sel-a{border-color:var(--rosso);background:var(--rosso-l);}
+.urg-card.sel-m{border-color:var(--arancio);background:var(--arancio-l);}
+.urg-card.sel-b{border-color:var(--verde);background:var(--verde-l);}
+.media-box{border:1.5px dashed var(--border);border-radius:8px;padding:18px;text-align:center;cursor:pointer;margin-bottom:12px;background:var(--white);}
+.media-box .ico{font-size:28px;display:block;margin-bottom:5px;}
+.media-box span{font-size:14px;color:var(--muted);}
+.media-box small{font-size:11px;color:var(--hint);display:block;margin-top:3px;}
+.media-box.done-f{border-color:var(--verde);background:var(--verde-l);}
+.rec-btn{width:100%;border:1.5px solid var(--border);background:var(--white);border-radius:8px;padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:12px;text-align:left;}
+.rec-btn .ico{font-size:22px;color:var(--muted);}
+.rec-btn .txt span{display:block;font-size:14px;color:var(--text);}
+.rec-btn .txt small{display:block;font-size:11px;color:var(--hint);}
+.rec-btn.recording{border-color:var(--rosso);background:var(--rosso-l);}
+.rec-btn.recording .ico{color:var(--rosso);}
+.rec-btn.done-r{border-color:var(--verde);background:var(--verde-l);}
+.rec-btn.done-r .ico{color:var(--verde);}
+.riepilogo{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px;}
+.rr{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:14px;}
+.rr:last-child{border-bottom:none;}
+.rr span{color:var(--muted);white-space:nowrap;}
+.rr strong{color:var(--text);text-align:right;}
+.geo-row{background:var(--blu-l);border-radius:8px;padding:10px 13px;margin-bottom:16px;font-size:13px;color:var(--blu-d);display:flex;align-items:center;gap:8px;}
+.btn-next{width:100%;background:var(--blu);color:#fff;border:none;padding:15px;border-radius:var(--radius);font-size:16px;font-weight:600;cursor:pointer;margin-top:6px;}
+.btn-next:active{opacity:.9;}
+.btn-back{width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);padding:13px;border-radius:var(--radius);font-size:15px;cursor:pointer;margin-top:10px;}
+.success-box{text-align:center;padding:20px 8px 32px;}
+.success-box .ico{font-size:54px;display:block;margin-bottom:12px;}
+.success-box h2{font-size:22px;font-weight:600;margin-bottom:8px;}
+.pratica{font-size:18px;font-weight:700;color:var(--blu);background:var(--blu-l);border-radius:var(--radius);padding:10px 20px;display:inline-block;margin:10px 0 14px;letter-spacing:1px;}
+.success-box p{font-size:15px;color:var(--muted);line-height:1.6;}
+.info-box{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-top:18px;font-size:13px;color:var(--muted);line-height:1.6;}
+.info-box strong{color:var(--text);}
+.footer{text-align:center;padding:14px;font-size:12px;color:var(--hint);border-top:1px solid var(--border);background:var(--white);}
+.err{color:var(--rosso);font-size:13px;margin-top:6px;display:none;}
+@media(min-width:600px){
+  .top{padding:16px 28px;}
+  .container{padding:28px 24px 60px;}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-row">
+    <div class="top-logo">📍 Segnala</div>
+    <div class="geo-badge" id="geo-badge">⏳ Localizzazione...</div>
+  </div>
+  <div class="top-sub">Segnalazioni cittadini — Comune di Biella</div>
+</header>
+
+<main class="container">
+  <div class="step-bar" id="sbar">
+    <div class="dot active" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+    <div class="dot" id="d4"></div>
+    <span class="step-lbl" id="slbl">Passo 1 di 4</span>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step on" id="s1">
+    <h2 class="stitle">Come vuoi segnalare?</h2>
+    <div class="grid2">
+      <div class="sel-card" id="an1" onclick="selAnon('an1','Anonimo')">
+        <span class="ico">🕵️</span>
+        <strong>Anonimo</strong>
+        <small>Nessun dato richiesto</small>
+      </div>
+      <div class="sel-card" id="an2" onclick="selAnon('an2','Identificato')">
+        <span class="ico">👤</span>
+        <strong>Con i miei dati</strong>
+        <small>Ricevi aggiornamenti</small>
+      </div>
+    </div>
+    <p class="err" id="err1">Scegli come vuoi segnalare.</p>
+    <div id="dati-box" style="display:none;margin-top:14px;">
+      <div class="fg">
+        <label>Nome e cognome <span class="optional">(opzionale)</span></label>
+        <input type="text" id="nome" placeholder="Mario Rossi" autocomplete="name"/>
+      </div>
+      <div class="fg">
+        <label>Telefono o email</label>
+        <input type="tel" id="contatto" placeholder="+39 015 000000" autocomplete="tel"/>
+      </div>
+    </div>
+    <button class="btn-next" onclick="next(1)">Avanti →</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="s2">
+    <h2 class="stitle">Cosa vuoi segnalare?</h2>
+    <div class="cat-grid">
+      <div class="cat-card" id="c1" onclick="selCat('c1','Degrado urbano')">
+        <span class="ico">🛣️</span>
+        <strong>Degrado urbano</strong>
+        <small>Buche, rifiuti, guasti</small>
+      </div>
+      <div class="cat-card" id="c2" onclick="selCat('c2','Ordine pubblico')">
+        <span class="ico">🚨</span>
+        <strong>Ordine pubblico</strong>
+        <small>Persone moleste, sospetti</small>
+      </div>
+      <div class="cat-card" id="c3" onclick="selCat('c3','Viabilità')">
+        <span class="ico">🚗</span>
+        <strong>Viabilità</strong>
+        <small>Parcheggio, segnaletica</small>
+      </div>
+      <div class="cat-card" id="c4" onclick="selCat('c4','Altro')">
+        <span class="ico">⚙️</span>
+        <strong>Altro</strong>
+        <small>Specifica nella descrizione</small>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">Urgenza *</p>
+    <div class="urg-grid">
+      <div class="urg-card" id="u1" onclick="selUrg('u1','Alta','a')">
+        <span class="ico">⚠️</span>
+        <strong>Alta</strong>
+        <small>Rischio immediato</small>
+      </div>
+      <div class="urg-card" id="u2" onclick="selUrg('u2','Media','m')">
+        <span class="ico">🟡</span>
+        <strong>Media</strong>
+        <small>Non urgente</small>
+      </div>
+      <div class="urg-card" id="u3" onclick="selUrg('u3','Bassa','b')">
+        <span class="ico">🟢</span>
+        <strong>Bassa</strong>
+        <small>Pianificabile</small>
+      </div>
+    </div>
+    <p class="err" id="err2">Seleziona tipo e urgenza.</p>
+    <button class="btn-next" onclick="next(2)">Avanti →</button>
+    <button class="btn-back" onclick="back(2)">← Indietro</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="s3">
+    <h2 class="stitle">Documentalo</h2>
+    <div class="media-box" id="foto-box" onclick="simFoto()">
+      <span class="ico" id="foto-ico">📷</span>
+      <span id="foto-lbl">Scatta una foto</span>
+      <small id="foto-sub">Oppure carica dalla galleria</small>
+    </div>
+    <div class="rec-btn" id="rec-btn" onclick="toggleRec()">
+      <span class="ico" id="rec-ico">🎙️</span>
+      <div class="txt">
+        <span id="rec-lbl">Registra un messaggio vocale</span>
+        <small id="rec-sub">Descrivi la situazione a voce</small>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Descrizione <span class="optional">(opzionale se hai foto/audio)</span></label>
+      <textarea id="desc" placeholder="Aggiungi dettagli utili..."></textarea>
+    </div>
+    <p class="err" id="err3">Aggiungi almeno una foto, un vocale o una descrizione.</p>
+    <button class="btn-next" onclick="next(3)">Avanti →</button>
+    <button class="btn-back" onclick="back(3)">← Indietro</button>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="s4">
+    <h2 class="stitle">Conferma e invia</h2>
+    <div class="geo-row">📍 <span id="geo-label">Posizione GPS rilevata automaticamente</span></div>
+    <div class="riepilogo">
+      <div class="rr"><span>Tipo</span><strong id="r-cat">—</strong></div>
+      <div class="rr"><span>Urgenza</span><strong id="r-urg">—</strong></div>
+      <div class="rr"><span>Allegati</span><strong id="r-media">—</strong></div>
+      <div class="rr"><span>Modalità</span><strong id="r-anon">—</strong></div>
+    </div>
+    <button class="btn-next" onclick="invia()">✓ Invia segnalazione</button>
+    <button class="btn-back" onclick="back(4)">← Modifica</button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="step" id="s5">
+    <div class="success-box">
+      <span class="ico">✅</span>
+      <h2>Segnalazione inviata!</h2>
+      <div class="pratica" id="pratica">SEG-2026-0000</div>
+      <p>La tua segnalazione è stata ricevuta dal Comune di Biella.<br>Conserva il numero per seguire lo stato.</p>
+      <div class="info-box">
+        ℹ️ Per le <strong>emergenze</strong> chiama sempre il <strong>112</strong>.<br>
+        Questa app è per segnalazioni non urgenti.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">Comune di Biella — Segnalazioni cittadini | <a href="#" style="color:var(--blu);">Privacy</a></footer>
+
+<script>
+var anonSel='',catSel='',urgSel='',fotoFatta=false,recFatto=false,recTimer=null,geoTxt='Posizione GPS rilevata';
+
+function showStep(n){
+  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('on');});
+  document.getElementById('s'+n).classList.add('on');
+  for(var i=1;i<=4;i++){
+    var d=document.getElementById('d'+i);if(!d)continue;
+    d.className='dot';
+    if(i<n)d.classList.add('done');
+    else if(i===n)d.classList.add('active');
+  }
+  var bar=document.getElementById('sbar'),lbl=document.getElementById('slbl');
+  if(n<=4){bar.style.display='flex';lbl.textContent='Passo '+n+' di 4';}
+  else bar.style.display='none';
+  window.scrollTo(0,0);
+}
+
+function showErr(id){var e=document.getElementById(id);e.style.display='block';setTimeout(function(){e.style.display='none';},3000);}
+
+function selAnon(id,val){
+  document.querySelectorAll('.sel-card').forEach(function(c){c.classList.remove('sel');});
+  document.getElementById(id).classList.add('sel');
+  anonSel=val;
+  document.getElementById('dati-box').style.display=val==='Identificato'?'block':'none';
+}
+
+function selCat(id,val){
+  document.querySelectorAll('.cat-card').forEach(function(c){c.classList.remove('sel');});
+  document.getElementById(id).classList.add('sel');
+  catSel=val;
+}
+
+function selUrg(id,val,lv){
+  document.querySelectorAll('.urg-card').forEach(function(c){c.className='urg-card';});
+  document.getElementById(id).classList.add('sel-'+lv);
+  urgSel=val;
+}
+
+function next(from){
+  if(from===1){if(!anonSel){showErr('err1');return;}}
+  if(from===2){
+    if(!catSel||!urgSel){showErr('err2');return;}
+    document.getElementById('r-cat').textContent=catSel;
+    document.getElementById('r-urg').textContent=urgSel+' urgenza';
+    document.getElementById('r-anon').textContent=anonSel;
+    document.getElementById('geo-label').textContent=geoTxt;
+  }
+  if(from===3){
+    var media=[];
+    if(fotoFatta)media.push('Foto');
+    if(recFatto)media.push('Vocale');
+    if(document.getElementById('desc').value.trim())media.push('Testo');
+    if(media.length===0){showErr('err3');return;}
+    document.getElementById('r-media').textContent=media.join(' + ');
+  }
+  showStep(from+1);
+}
+
+function back(from){showStep(from-1);}
+
+function simFoto(){
+  fotoFatta=true;
+  var box=document.getElementById('foto-box');
+  box.classList.add('done-f');
+  document.getElementById('foto-ico').textContent='✅';
+  document.getElementById('foto-lbl').textContent='Foto aggiunta';
+  document.getElementById('foto-sub').textContent='Tocca per cambiare';
+}
+
+function toggleRec(){
+  var btn=document.getElementById('rec-btn');
+  if(recFatto)return;
+  if(!btn.classList.contains('recording')){
+    btn.classList.add('recording');
+    document.getElementById('rec-ico').textContent='⏹️';
+    document.getElementById('rec-lbl').textContent='Registrazione in corso...';
+    document.getElementById('rec-sub').textContent='Tocca per fermare';
+    recTimer=setTimeout(stopRec,5000);
+  } else {clearTimeout(recTimer);stopRec();}
+}
+
+function stopRec(){
+  var btn=document.getElementById('rec-btn');
+  btn.classList.remove('recording');
+  btn.classList.add('done-r');
+  document.getElementById('rec-ico').textContent='✅';
+  document.getElementById('rec-lbl').textContent='Vocale registrato';
+  document.getElementById('rec-sub').textContent='Tocca per riascoltare';
+  recFatto=true;
+}
+
+function invia(){
+  var num='SEG-'+new Date().getFullYear()+'-'+Math.floor(Math.random()*9000+1000);
+  document.getElementById('pratica').textContent=num;
+  document.getElementById('sbar').style.display='none';
+  showStep(5);
+}
+
+if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(function(pos){
+    geoTxt='GPS: '+pos.coords.latitude.toFixed(4)+', '+pos.coords.longitude.toFixed(4);
+    document.getElementById('geo-badge').textContent='📍 Posizione rilevata';
+  },function(){
+    geoTxt='Posizione approssimativa (GPS non disponibile)';
+    document.getElementById('geo-badge').textContent='📍 Posizione approssimativa';
+  });
+} else {
+  document.getElementById('geo-badge').textContent='📍 GPS non disponibile';
+}
+</script>
+</body>
+</html>
