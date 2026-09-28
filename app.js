@@ -174,11 +174,13 @@ function scrScan() {
     <div class="modes" role="group" aria-label="Cosa vuoi fare">
       <button data-act="mode" data-mode="recog" aria-pressed="${m === 'recog'}">Riconosci la pianta</button>
       <button data-act="mode" data-mode="diag" aria-pressed="${m === 'diag'}">C'è un problema?</button></div>
-    <label class="drop ${state.photoURL ? 'has' : ''}" id="drop" for="photo">
-      <input type="file" id="photo" accept="image/*" capture="environment">
-      ${state.photoURL ? `<img src="${state.photoURL}" alt="Foto scelta">`
-        : `<span style="display:grid;gap:8px;justify-items:center">${ICON.cam}<b>Scatta o scegli una foto</b><span class="small muted">${m === 'diag' ? 'Inquadra da vicino la parte malata: foglie, macchie, insetti' : 'Inquadra foglie e fiori, con luce naturale'}</span></span>`}
-    </label>
+    ${state.photoURL
+      ? `<div class="drop has" id="drop"><img src="${state.photoURL}" alt="Foto scelta"></div>`
+      : `<div class="drop" id="drop"><span style="display:grid;gap:12px;justify-items:center;width:100%">${ICON.cam}<span class="small muted">${m === 'diag' ? 'Inquadra da vicino la parte malata: foglie, macchie, insetti' : 'Inquadra foglie e fiori, con luce naturale'}</span>
+        <span class="scelte-foto">
+          <label class="btn" for="photo">${ICON.cam} Scatta una foto<input type="file" id="photo" accept="image/*" capture="environment"></label>
+          <label class="btn quiet" for="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5-8 8.5"/></svg> Scegli dalla galleria<input type="file" id="galleria" accept="image/*"></label>
+        </span></span></div>`}
     ${state.photoURL ? '<button class="linkbtn" data-act="clearphoto" style="justify-self:start">Cambia foto</button>' : ''}
     ${m === 'diag' ? `<label class="field" for="desc">Cosa hai notato? (facoltativo)<textarea id="desc" maxlength="600" placeholder="Es. da una settimana le foglie in basso ingialliscono">${esc(state.desc)}</textarea></label>` : ''}
     ${state.busy ? `<div class="status"><span class="spinner"></span><span>${esc(state.scanStatus)}</span></div>`
@@ -471,7 +473,7 @@ document.addEventListener('change', async e => {
     document.querySelectorAll(`input[data-act="done"][data-mia="${mia}"][data-mese="${mese}"][data-i="${i}"]`).forEach(x => { x.checked = t.checked; x.closest('.task')?.classList.toggle('done', t.checked); });
     return;
   }
-  if (t.id === 'photo') { setPhoto(t.files && t.files[0]); return; }
+  if (t.id === 'photo' || t.id === 'galleria') { setPhoto(t.files && t.files[0]); return; }
   if (t.id === 'zona') { state.zona = t.value; scriviLocale('radice_zona', t.value); renderScreen(); }
 });
 document.addEventListener('input', e => {
