@@ -6,7 +6,7 @@ export const supabase = configurato ? createClient(SUPABASE_URL, SUPABASE_ANON_K
 
 // Chiama la funzione IA "analizza" e restituisce un messaggio leggibile in caso di errore.
 // "attesa" = tempo massimo in millisecondi: oltre, si interrompe invece di girare all'infinito.
-export async function chiamaIA(body, attesa = 75000) {
+export async function chiamaIA(body, attesa = 90000) {
   const { data, error } = await supabase.functions.invoke('analizza', { body, timeout: attesa });
   if (error) {
     let msg = 'Il servizio di analisi non risponde. Riprova tra poco.';
